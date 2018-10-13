@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta name="google-signin-client_id" content="112899402732-vo80ju75levu8ku813c57i5mvcupomcu.apps.googleusercontent.com">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="/jquery-3.2.1.js"></script>
+    <script>
+    
+    function loginRequest(){
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        console.log(username);
+        $.ajax({
+            url: '/auth/login/local',
+            type:'post',
+            data : 'username='+username+'&password='+password,
+            success:(result)=>{
+                    console.log(result);
+                if(!(result.username)){ alert("Username Incorrect");}
+                else if(!(result.password)){ alert("Password Incorrect");}
+                else {alert("Successfully Logged in"); 
+                window.location.replace("/user");
+            }
+            }
+        });
+        return false;
+    }
+
+    // auth2 is initialized with gapi.auth2.init() and a user is signed in.
+
+function onSignIn(googleUser) {
+    console.log(googleUser);
+  var profile = googleUser.getBasicProfile();
+  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  console.log('Name: ' + profile.getName());
+  console.log('Image URL: ' + profile.getImageUrl());
+  console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+    let name= profile.getName();
+  let username = profile.getEmail();
+        //let password = ;
+        console.log(username);
+        $.ajax({
+            url: '/auth/login/google',
+            type:'post',
+            data : 'username='+username+'&name='+name,
+            success:(result)=>{
+                //    console.log(result); 
+                window.location.replace("/user");
+                signOut();
+            }
+        });
+}
+
+function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+  }
+
+    </script>
+    
+<script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '1774493649340136',
+        cookie     : true,
+        xfbml      : true,
+        version    : 'v3.1'
+      });
+        
+      FB.AppEvents.logPageView();   
+        
+    };
+  
+    (function(d, s, id){
+       var js, fjs = d.getElementsByTagName(s)[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement(s); js.id = id;
+       js.src = "https://connect.facebook.net/en_US/sdk.js";
+       fjs.parentNode.insertBefore(js, fjs);
+     }(document, 'script', 'facebook-jssdk'));
+  
+  
+FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+});
+  
+function statusChangeCallback(response) {
+  
+    if (response.status === 'connected') {
+      FB.api('/me?fields=name,email', function(response) {
+        
+        let name= response.name;
+        let username = response.email;
+        //let password = ;
+        //console.log(username);
+        $.ajax({
+            url: '/auth/login/google',
+            type:'post',
+            data : 'username='+username+'&name='+name,
+            success:(result)=>{
+                //    console.log(result); 
+                window.location.replace("/user");
+            }
+        });    });
+  
+    }
+  }
+
+  
+
+function checkLoginState() {
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
+}
+  </script>
+
+</head>
+<body>
+    
+<form action="" onsubmit="return loginRequest();">
+        <input type="email" name="username" id="username">
+        <input type="password" name="password" id="password">
+        <button type="submit">Submit</button>
+        </form>
+        
+        <div class="g-signin2" data-onsuccess="onSignIn">SignIn With Google</div>
+        
+<fb:login-button 
+scope="public_profile,email"
+onlogin="checkLoginState();">
+</fb:login-button>
+        <!--  <button type="submit">Log In with Google</button>-->
+        
+        
+</body>
+</html>
